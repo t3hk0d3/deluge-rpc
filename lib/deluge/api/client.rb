@@ -18,6 +18,8 @@ module Deluge
         @auth_level = @connection.call('daemon.login', @login, @password)
 
         register_methods!
+
+        true
       end
 
       def close
