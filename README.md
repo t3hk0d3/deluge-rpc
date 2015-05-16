@@ -1,12 +1,13 @@
 # Deluge::Api
 
-Ruby RPC client library for Deluge torrent client.
-http://deluge-torrent.org/
+Ruby RPC client library for Deluge torrent client.  
+Provides dynamic API bindings depending on RPC server.  
+Multi-threading friendly, thanks to ``concurrent-ruby`` gem.
 
-Official documentation about RPC protocol:
+Official RPC protocol documentation:  
 http://deluge.readthedocs.org/en/develop/core/rpc.html
 
-Deluge RPC API reference is here:
+Deluge RPC API reference:  
 http://deluge.readthedocs.org/en/develop/core/rpc.html#remote-api
 
 ## Usage
@@ -21,11 +22,12 @@ client = Deluge::Api::Client.new(host: 'localhost', port: 58846, login: 'usernam
 client.start
 
 # Get auth level
-client.auth_level # => 5
+client.auth_level
+# => 5
 
 # Get available methods
 client.api_methods
-# => ['core.add_torrent_file', 'core.shutdown', ...]
+# => ['daemon.add_torrent_file', 'core.shutdown', ...]
 
 # Get deluge version
 client.daemon.info
