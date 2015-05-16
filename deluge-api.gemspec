@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["clouster@yandex.ru"]
   spec.summary       = %q{Deluge RPC protocol wrapper}
   spec.description   = %q{Communicate with Deluge torrent client via RPC protocol}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/t3hk0d3/deluge-api"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
