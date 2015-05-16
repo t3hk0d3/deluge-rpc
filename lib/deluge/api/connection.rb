@@ -14,20 +14,21 @@ module Deluge
 
       class InvokeTimeoutError < StandardError; end
 
-      DEFAULT_CALL_TIMEOUT = 1 # second
+      DEFAULT_CALL_TIMEOUT = 5.0 # seconds
+
+      DEFAULT_PORT = 58846
 
       RPC_RESPONSE = 1
       RPC_ERROR = 2
       RPC_EVENT = 3
 
       attr_reader :host, :port
-      attr_reader :username, :password
 
       def initialize(options = {})
         @host = options.delete(:host) || 'localhost'
-        @port = (options.delete(:port) || 58846).to_i
+        @port = (options.delete(:port) || DEFAULT_PORT).to_i
 
-        @call_timeout = options.delete(:call_timeout) || 5.0 # 5 seconds timeout
+        @call_timeout = options.delete(:call_timeout) || DEFAULT_CALL_TIMEOUT
 
         @request_id = Concurrent::AtomicFixnum.new
         @running = Concurrent::AtomicBoolean.new
