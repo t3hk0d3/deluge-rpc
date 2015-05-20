@@ -96,7 +96,7 @@ Avoid time-consuming code!
 ``SessionStartedEvent``       | &nbsp;                  | Session has started.  This typically only happens once when the daemon is initially started.
 ``SessionPausedEvent``        | &nbsp;                  | Session has been paused.
 ``SessionResumedEvent``       | &nbsp;                  | Session has been resumed.
-``ConfigValueChanged``Event   | key, value              | Config value changes in the Core.
+``ConfigValueChangedEvent``   | key, value              | Config value changes in the Core.
 ``PluginEnabledEvent``        | name                    | Plugin is enabled in the Core.
 ``PluginDisabledEvent``       | name                    | Plugin is disabled in the Core.
 
