@@ -67,23 +67,19 @@ module Deluge
       end
 
       def call(method, *args)
+        raise "Not connected!" unless @connection
+
         kwargs = {}
         kwargs = args.pop if args.size == 1 && args.last.is_a?(Hash)
 
         future = Concurrent::IVar.new
 
         request_id = @request_id.increment
+        @messages[request_id] = future
+
         message = [[request_id, method, args, kwargs]]
 
-        raw = Zlib::Deflate.deflate Rencoder.dump(message)
-
-        @write_mutex.synchronize do
-          @messages[request_id] = future
-
-          if IO.select([], [@connection], nil, nil)
-            @connection.write(raw)
-          end
-        end
+        write_packet(message)
 
         result = future.value!(@call_timeout)
 
@@ -117,11 +113,12 @@ module Deluge
             end
           end
         end
-
-        @connection.close if @connection
-        @connection = nil
       rescue => e
         @main_thread.raise(e)
+      ensure
+        @connection.close if @connection
+        @connection = nil
+        @messages.clear
       end
 
       def dispatch_packet(packet)
@@ -138,7 +135,17 @@ module Deluge
           var.fail(RPCError.new(value))
         # TODO: Add events support
         else
-          raise "Unknown response type #{type}"
+          raise "Unknown packet type #{type.inspect}"
+        end
+      end
+
+      def write_packet(packet)
+        raw = Zlib::Deflate.deflate Rencoder.dump(packet)
+
+        @write_mutex.synchronize do
+          if IO.select([], [@connection], nil, nil)
+            @connection.write(raw)
+          end
         end
       end
 
