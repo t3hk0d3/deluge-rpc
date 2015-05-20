@@ -100,9 +100,10 @@ Avoid time-consuming code!
 ``PluginEnabledEvent``        | name                    | Plugin is enabled in the Core.
 ``PluginDisabledEvent``       | name                    | Plugin is disabled in the Core.
 
-This list was extracted from Deluge 1.3.11 sources. Events for your version can different. There is no official documentation.
+This list was extracted from Deluge 1.3.11 sources. Events for your version can be different.  
+There is no official documentation.
 
-Current list could be found here: http://git.deluge-torrent.org/deluge/tree/deluge/event.py
+Current events could be found here: http://git.deluge-torrent.org/deluge/tree/deluge/event.py
 
 ## Installation
 
