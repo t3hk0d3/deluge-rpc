@@ -22,7 +22,7 @@ client = Deluge::Api::Client.new(
 )
 
 # Start connection and authenticate
-client.start
+client.connect
 
 # Get auth level
 client.auth_level
