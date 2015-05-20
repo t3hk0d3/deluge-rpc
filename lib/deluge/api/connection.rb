@@ -14,6 +14,9 @@ module Deluge
       class InvokeTimeoutError < StandardError; end
       class ConnectionClosedError < StandardError; end
 
+      DAEMON_LOGIN = 'daemon.login'
+      DAEMON_METHOD_LIST = 'daemon.get_method_list'
+
       DEFAULT_CALL_TIMEOUT = 5.0 # seconds
 
       DEFAULT_PORT = 58846
@@ -49,6 +52,14 @@ module Deluge
 
         @main_thread = Thread.current
         @thread = Thread.new(&self.method(:read_loop))
+      end
+
+      def authenticate(login, password)
+        self.call(DAEMON_LOGIN, login, password)
+      end
+
+      def method_list
+        self.call(DAEMON_METHOD_LIST)
       end
 
       def close

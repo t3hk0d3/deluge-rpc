@@ -5,8 +5,8 @@ describe Deluge::Api::Client do
   let(:connection) do
     double('ApiConnection').tap do |connection|
       allow(connection).to receive(:start)
-      allow(connection).to receive(:call).with('daemon.login', 'test', 'password').and_return(5)
-      allow(connection).to receive(:call).with('daemon.get_method_list').and_return(['test.api.method'])
+      allow(connection).to receive(:authenticate).with('test', 'password').and_return(5)
+      allow(connection).to receive(:method_list).and_return(['test.api.method'])
       allow(connection).to receive(:call).with('test.api.method').and_return('winning')
       allow(connection).to receive(:close)
     end
@@ -28,15 +28,11 @@ describe Deluge::Api::Client do
     end
 
     it 'authenticate' do
-      expect(connection).to have_received(:call).with('daemon.login', 'test', 'password')
+      expect(connection).to have_received(:authenticate).with('test', 'password')
     end
 
     it 'set auth_level' do
       expect(subject.auth_level).to eq(5)
-    end
-
-    it 'fetch methods' do
-      expect(connection).to have_received(:call).with('daemon.get_method_list')
     end
 
     it 'register methods' do

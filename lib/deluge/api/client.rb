@@ -15,7 +15,7 @@ module Deluge
       def connect
         @connection.start
 
-        @auth_level = @connection.call('daemon.login', @login, @password)
+        @auth_level = @connection.authenticate(@login, @password)
 
         register_methods!
 
@@ -35,7 +35,7 @@ module Deluge
       private
 
       def register_methods!
-        methods = @connection.call('daemon.get_method_list')
+        methods = @connection.method_list
 
         methods.each do |method|
           *namespaces, method_name = method.split('.')
