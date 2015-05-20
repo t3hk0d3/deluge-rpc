@@ -22,6 +22,18 @@ module Deluge
         true
       end
 
+      def register_event(event_name, &block)
+        raise "Provide block for event" unless block
+
+        if event_name.is_a?(Symbol)
+          event_name = "#{event_name}_event"
+          # convert to CamelCase
+          event_name.gsub!(/(?:_|^)(.)/) { |match| $1.upcase }
+        end
+
+        @connection.register_event(event_name, &block)
+      end
+
       def close
         @connection.close
         @auth_level = nil

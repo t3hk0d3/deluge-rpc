@@ -16,6 +16,7 @@ module Deluge
 
       DAEMON_LOGIN = 'daemon.login'
       DAEMON_METHOD_LIST = 'daemon.get_method_list'
+      DAEMON_REGISTER_EVENT = 'daemon.set_event_interest'
 
       DEFAULT_CALL_TIMEOUT = 5.0 # seconds
 
@@ -37,6 +38,7 @@ module Deluge
         @running = Concurrent::AtomicBoolean.new
 
         @messages = {}
+        @events = {}
 
         @write_mutex = Mutex.new
       end
@@ -52,6 +54,11 @@ module Deluge
 
         @main_thread = Thread.current
         @thread = Thread.new(&self.method(:read_loop))
+
+        # register present events
+        recover_events! if @events.size > 0
+
+        true
       end
 
       def authenticate(login, password)
@@ -60,6 +67,17 @@ module Deluge
 
       def method_list
         self.call(DAEMON_METHOD_LIST)
+      end
+
+      def register_event(event_name, force = false, &block)
+        unless @events[event_name] # Register event only ONCE!
+          self.call(DAEMON_REGISTER_EVENT, [event_name]) if @connection # Let events be initialized lazily
+        end
+
+        @events[event_name] ||= []
+        @events[event_name] << block
+
+        true
       end
 
       def close
@@ -124,16 +142,24 @@ module Deluge
       def dispatch_packet(packet)
         type, response_id, value = packet
 
-        var = @messages[response_id]
-
-        return unless var # TODO: Handle unknown messages
-
         case type
-        when RPC_RESPONSE
-          var.set(value)
-        when RPC_ERROR
-          var.fail(RPCError.new(value))
-        # TODO: Add events support
+        when RPC_RESPONSE, RPC_ERROR
+          future = @messages[response_id]
+
+          return unless future # TODO: Handle unknown messages
+
+          if type == RPC_RESPONSE
+            future.set(value)
+          else
+            future.fail(RPCError.new(value))
+          end
+        when RPC_EVENT
+          handlers = @events[response_id]
+          return unless handlers # TODO: Handle unknown events
+
+          handlers.each do |block|
+            block.call(*value)
+          end
         else
           raise "Unknown packet type #{type.inspect}"
         end
@@ -159,6 +185,17 @@ module Deluge
         raw = Zlib::Inflate.inflate(raw)
 
         parse_packets(raw)
+      end
+
+      def recover_events!
+        present_events = @events
+        @events = {}
+
+        present_events.each do |event, handlers|
+          handlers.each do |handler|
+            self.register_event(event, &handler)
+          end
+        end
       end
 
       def create_socket
