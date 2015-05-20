@@ -11,8 +11,8 @@ module Deluge
   module Api
     class Connection
       class RPCError < StandardError; end
-
       class InvokeTimeoutError < StandardError; end
+      class ConnectionClosedError < StandardError; end
 
       DEFAULT_CALL_TIMEOUT = 5.0 # seconds
 
@@ -87,31 +87,22 @@ module Deluge
 
       def read_loop
         while(@running.true?)
-          next unless IO.select([@connection], nil, nil, 0.1)
+          io_poll = IO.select([@connection], nil, [@connection], 0.1)
 
-          raw = ""
-          begin
-            buffer = @connection.readpartial(1024)
-            raw += buffer
-          end until(buffer.size < 1024)
+          next unless io_poll
 
-          raw = Zlib::Inflate.inflate(raw)
+          read_sockets, _, error_sockets = io_poll
 
-          parse_packets(raw).each do |packet|
-            type, response_id, value = packet
+          if @connection.eof?
+            # TODO: implement auto-recovery
+            raise ConnectionClosedError
+          end
 
-            var = @messages[response_id]
+          read_sockets.each do |socket|
+            packets = read_packets(socket)
 
-            next unless var # TODO: Handle unknown messages
-
-            case type
-            when RPC_RESPONSE
-              var.set(value)
-            when RPC_ERROR
-              var.fail(RPCError.new(value))
-            # TODO: Add events support
-            else
-              raise "Unknown response type #{type}"
+            packets.each do |packet|
+              dispatch_packet(packet)
             end
           end
         end
@@ -120,6 +111,36 @@ module Deluge
         @connection = nil
       rescue => e
         @main_thread.raise(e)
+      end
+
+      def dispatch_packet(packet)
+        type, response_id, value = packet
+
+        var = @messages[response_id]
+
+        return unless var # TODO: Handle unknown messages
+
+        case type
+        when RPC_RESPONSE
+          var.set(value)
+        when RPC_ERROR
+          var.fail(RPCError.new(value))
+        # TODO: Add events support
+        else
+          raise "Unknown response type #{type}"
+        end
+      end
+
+      def read_packets(socket)
+        raw = ""
+        begin
+          buffer = socket.readpartial(1024)
+          raw += buffer
+        end until(buffer.size < 1024)
+
+        raw = Zlib::Inflate.inflate(raw)
+
+        parse_packets(raw)
       end
 
       def create_socket
