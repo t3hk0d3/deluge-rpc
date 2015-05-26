@@ -144,7 +144,7 @@ module Deluge
 
         case type
         when RPC_RESPONSE, RPC_ERROR
-          future = @messages[response_id]
+          future = @messages.delete(response_id)
 
           return unless future # TODO: Handle unknown messages
 
