@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Deluge::Api::Namespace do
+describe Deluge::Rpc::Namespace do
 
   let(:connection) do
-    double('ApiConnection').tap do |connection|
+    double('RpcConnection').tap do |connection|
       allow(connection).to receive(:call)
     end
   end

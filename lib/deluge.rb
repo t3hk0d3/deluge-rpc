@@ -1,1 +1,1 @@
-require_relative 'deluge/api'
+require_relative 'deluge/rpc'

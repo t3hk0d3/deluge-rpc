@@ -1,16 +1,16 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'deluge/api/version'
+require 'deluge/rpc/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "deluge-api"
-  spec.version       = Deluge::Api::VERSION
+  spec.name          = "deluge-rpc"
+  spec.version       = Deluge::Rpc::VERSION
   spec.authors       = ["Igor Yamolov"]
   spec.email         = ["clouster@yandex.ru"]
   spec.summary       = %q{Deluge RPC protocol wrapper}
   spec.description   = %q{Communicate with Deluge torrent client via RPC protocol}
-  spec.homepage      = "https://github.com/t3hk0d3/deluge-api"
+  spec.homepage      = "https://github.com/t3hk0d3/deluge-rpc"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")

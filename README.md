@@ -1,4 +1,4 @@
-# Deluge::Api
+# Deluge::RPC
 
 Ruby RPC client library for Deluge torrent client.  
 Provides dynamic API bindings depending on RPC server.  
@@ -16,7 +16,7 @@ http://deluge.readthedocs.org/en/develop/core/rpc.html#remote-api
 require 'deluge'
 
 # Initialize client
-client = Deluge::Api::Client.new(
+client = Deluge::Rpc::Client.new(
     host: 'localhost', port: 58846,
     login: 'username', password: 'password'
 )
@@ -42,7 +42,7 @@ client.core.get_torrents_status({}, ['name', 'hash'])
 
 # Get namespace
 core = client.core
-# => <Deluge::Api::Namespace name="core">
+# => <Deluge::Rpc::Namespace name="core">
 
 # Get namespace methods
 core.api_methods
@@ -110,7 +110,7 @@ Current events could be found here: http://git.deluge-torrent.org/deluge/tree/de
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'deluge-api'
+gem 'deluge-rpc'
 ```
 
 And then execute:
@@ -119,4 +119,4 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install deluge-api
+    $ gem install deluge-rpc

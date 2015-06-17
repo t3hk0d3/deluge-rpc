@@ -8,7 +8,7 @@ require 'stringio'
 require 'concurrent'
 
 module Deluge
-  module Api
+  module Rpc
     class Connection
       class RPCError < StandardError; end
       class InvokeTimeoutError < StandardError; end

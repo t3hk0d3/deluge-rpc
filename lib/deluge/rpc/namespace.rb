@@ -1,5 +1,5 @@
 module Deluge
-  module Api
+  module Rpc
     class Namespace
       attr_reader :name, :connection, :namespaces, :api_methods
 

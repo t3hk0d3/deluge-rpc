@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Deluge::Api::Client do
+describe Deluge::Rpc::Client do
 
   let(:connection) do
-    double('ApiConnection').tap do |connection|
+    double('RpcConnection').tap do |connection|
       allow(connection).to receive(:start)
       allow(connection).to receive(:authenticate).with('test', 'password').and_return(5)
       allow(connection).to receive(:method_list).and_return(['test.api.method'])
@@ -13,7 +13,7 @@ describe Deluge::Api::Client do
   end
 
   before do
-    allow(Deluge::Api::Connection).to receive(:new).with(kind_of(Hash)).and_return(connection)
+    allow(Deluge::Rpc::Connection).to receive(:new).with(kind_of(Hash)).and_return(connection)
   end
 
   subject { described_class.new(host: 'localhost', login: 'test', password: 'password') }
@@ -40,7 +40,7 @@ describe Deluge::Api::Client do
     end
 
     it 'create namespace access methods' do
-      expect(subject.test).to be_a(Deluge::Api::Namespace).and have_attributes(name: 'test')
+      expect(subject.test).to be_a(Deluge::Rpc::Namespace).and have_attributes(name: 'test')
     end
 
     it 'create api access methods' do

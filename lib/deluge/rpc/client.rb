@@ -1,10 +1,10 @@
 module Deluge
-  module Api
+  module Rpc
     class Client
       attr_reader :namespaces, :api_methods, :auth_level
 
       def initialize(options = {})
-        @connection = Deluge::Api::Connection.new(options)
+        @connection = Deluge::Rpc::Connection.new(options)
         @login = options.fetch(:login)
         @password = options.fetch(:password)
 
@@ -69,7 +69,7 @@ module Deluge
         root = @namespaces[ns]
 
         unless root
-          root = Api::Namespace.new(ns, @connection)
+          root = Rpc::Namespace.new(ns, @connection)
           @namespaces[ns] = root
 
           define_singleton_method(ns.to_sym) do
