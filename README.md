@@ -103,7 +103,8 @@ Avoid time-consuming code!
 This list was extracted from Deluge 1.3.11 sources. Events for your version could be different.  
 There is no official documentation.
 
-Current events could be found here: http://git.deluge-torrent.org/deluge/tree/deluge/event.py
+Current events could be found here:
+https://github.com/deluge-torrent/deluge/blob/master/deluge/event.py
 
 ## Installation
 
