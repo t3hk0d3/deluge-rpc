@@ -1,14 +1,16 @@
 # Deluge::RPC
 
-Ruby RPC client library for Deluge torrent client.  
+Ruby RPC client library for Deluge 2.0+ torrent client.  
 Provides dynamic API bindings depending on RPC server.  
 Multi-threading friendly, thanks to ``concurrent-ruby`` gem.
 
+Deluge 1.x is not supported anymore.
+
 Official RPC protocol documentation:  
-http://deluge.readthedocs.org/en/develop/core/rpc.html
+https://deluge.readthedocs.io/en/latest/reference/rpc.html
 
 Deluge RPC API reference:  
-http://deluge.readthedocs.org/en/develop/core/rpc.html#remote-api
+https://deluge.readthedocs.io/en/latest/reference/api.html
 
 ## Usage
 

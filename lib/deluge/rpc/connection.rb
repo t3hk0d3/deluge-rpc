@@ -1,4 +1,7 @@
+# frozen_string_literal: true
+
 require 'rencoder'
+
 require 'socket'
 require 'openssl'
 require 'thread'
@@ -13,6 +16,8 @@ module Deluge
       class RPCError < StandardError; end
       class InvokeTimeoutError < StandardError; end
       class ConnectionClosedError < StandardError; end
+
+      PROTOCOL_VERSION = 0x01
 
       DAEMON_LOGIN = 'daemon.login'
       DAEMON_METHOD_LIST = 'daemon.get_method_list'
@@ -102,7 +107,7 @@ module Deluge
         result = future.value!(@call_timeout)
 
         if result.nil? && future.pending?
-          raise InvokeTimeoutError.new("Failed to retreive response for '#{method}' in #{@call_timeout} seconds. Probably method not exists.")
+          raise InvokeTimeoutError.new("Failed to retrieve response for '#{method}' in #{@call_timeout} seconds. Probably method not exists.")
         end
 
         result
@@ -167,6 +172,7 @@ module Deluge
 
       def write_packet(packet)
         raw = Zlib::Deflate.deflate Rencoder.dump(packet)
+        raw = [PROTOCOL_VERSION, raw.bytesize].pack("CN") + raw
 
         @write_mutex.synchronize do
           if IO.select([], [@connection], nil, nil)
@@ -177,11 +183,13 @@ module Deluge
 
       def read_packets(socket)
         raw = ""
-        begin
-          buffer = socket.readpartial(1024)
-          raw += buffer
-        end until(buffer.size < 1024)
 
+        # Read message header
+        protocol_version, buffer_size = socket.readpartial(5).unpack('CN')
+
+        raise('Received response with unknown protocol_version=' + protocol_version) if protocol_version != PROTOCOL_VERSION
+
+        raw = socket.readpartial(buffer_size)
         raw = Zlib::Inflate.inflate(raw)
 
         parse_packets(raw)
@@ -210,12 +218,7 @@ module Deluge
       end
 
       def ssl_context
-        # SSLv3 is not allowed (http://dev.deluge-torrent.org/ticket/2555)
-        context = OpenSSL::SSL::SSLContext.new('SSLv23')
-        # TODO: Consider allowing server certificate validation
-        context.set_params(verify_mode: OpenSSL::SSL::VERIFY_NONE)
-
-        context
+        OpenSSL::SSL::SSLContext.new
       end
 
       def parse_packets(raw)
