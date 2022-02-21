@@ -1,16 +1,19 @@
 # Deluge::RPC
 
-Ruby RPC client library for Deluge 2.0+ torrent client.  
-Provides dynamic API bindings depending on RPC server.  
+Ruby RPC client library for [Deluge 2.0+ torrent client](https://deluge-torrent.org/).
+Provides dynamic API bindings depending on RPC server.
 Multi-threading friendly, thanks to ``concurrent-ruby`` gem.
 
-Deluge 1.x is not supported anymore.
+*Deluge 1.x is not supported anymore*.
 
-Official RPC protocol documentation:  
-https://deluge.readthedocs.io/en/latest/reference/rpc.html
+## Reference
 
-Deluge RPC API reference:  
-https://deluge.readthedocs.io/en/latest/reference/api.html
+* [Official RPC protocol documentation](https://deluge.readthedocs.io/en/latest/reference/rpc.html)
+* [Deluge RPC API reference](https://deluge.readthedocs.io/en/latest/reference/api.html)
+* [Official repository](https://github.com/deluge-torrent/deluge)
+* Other client implementations:
+  [Go](https://github.com/gdm85/go-libdeluge),
+  [Python](https://github.com/JohnDoee/deluge-client)
 
 ## Usage
 
@@ -74,10 +77,10 @@ client.register_event(:torrent_removed) do |torrent_id|
 end
 ```
 
-Unfortunately there is no way to listen ALL events, due to Deluge architecture.  
+Unfortunately there is no way to listen ALL events, due to Deluge architecture.
 You have to register each event you need.
 
-**Keep in mind event blocks would be executed in connection thread, NOT main thread!**  
+**Keep in mind event blocks would be executed in connection thread, NOT main thread!**
 Avoid time-consuming code!
 
 ### Known events
@@ -102,7 +105,7 @@ Avoid time-consuming code!
 ``PluginEnabledEvent``        | name                    | Plugin is enabled in the Core.
 ``PluginDisabledEvent``       | name                    | Plugin is disabled in the Core.
 
-This list was extracted from Deluge 1.3.11 sources. Events for your version could be different.  
+This list was extracted from Deluge 1.3.11 sources. Events for your version could be different.
 There is no official documentation.
 
 Current events could be found here:
@@ -118,8 +121,12 @@ gem 'deluge-rpc'
 
 And then execute:
 
-    $ bundle
+```shell
+$ bundle
+```
 
 Or install it yourself as:
 
-    $ gem install deluge-rpc
+```shell
+$ gem install deluge-rpc
+```
