@@ -94,6 +94,7 @@ module Deluge
 
         kwargs = {}
         kwargs = args.pop if args.size == 1 && args.last.is_a?(Hash)
+        kwargs['client_version'] = Deluge::Rpc::VERSION.to_s if method == 'daemon.login'
 
         future = Concurrent::IVar.new
 
