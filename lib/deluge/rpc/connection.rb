@@ -67,7 +67,7 @@ module Deluge
       end
 
       def authenticate(login, password)
-        self.call(DAEMON_LOGIN, login, password)
+        self.call(DAEMON_LOGIN, [login, password, {'client_version' => Deluge::Rpc::VERSION.to_s}])
       end
 
       def method_list
@@ -93,7 +93,10 @@ module Deluge
         raise "Not connected!" unless @connection
 
         kwargs = {}
-        kwargs = args.pop if args.size == 1 && args.last.is_a?(Hash)
+        if args.size == 1 && args[0].last.is_a?(Hash)
+          kwargs = args[0].pop
+          args   = args[0]
+        end
 
         future = Concurrent::IVar.new
 
