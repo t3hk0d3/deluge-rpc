@@ -192,7 +192,10 @@ module Deluge
 
         raise('Received response with unknown protocol_version=' + protocol_version) if protocol_version != PROTOCOL_VERSION
 
-        raw = socket.readpartial(buffer_size)
+        # a big response requires some extra reads because deluged may be
+        # slow to generate and send all the data through the socket
+        raw += socket.readpartial(buffer_size - raw.bytesize) while raw.bytesize < buffer_size
+        
         raw = Zlib::Inflate.inflate(raw)
 
         parse_packets(raw)
