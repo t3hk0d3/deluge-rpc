@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Deluge
   module Rpc
     class Client
@@ -23,12 +25,12 @@ module Deluge
       end
 
       def register_event(event_name, &block)
-        raise "Provide block for event" unless block
+        raise 'Provide block for event' unless block
 
         if event_name.is_a?(Symbol)
           event_name = "#{event_name}_event"
           # convert to CamelCase
-          event_name.gsub!(/(?:_|^)(.)/) { |match| $1.upcase }
+          event_name.gsub!(/(?:_|^)(.)/) { |_match| Regexp.last_match(1).upcase }
         end
 
         @connection.register_event(event_name, &block)
@@ -39,7 +41,7 @@ module Deluge
         @auth_level = nil
         @api_methods = []
         @namespaces.each_key do |ns|
-          self.singleton_class.send :undef_method, ns
+          singleton_class.send :undef_method, ns
         end
         @namespaces = {}
       end
@@ -83,7 +85,6 @@ module Deluge
 
         root
       end
-
     end
   end
 end

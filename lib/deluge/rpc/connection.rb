@@ -4,7 +4,6 @@ require 'rencoder'
 
 require 'socket'
 require 'openssl'
-require 'thread'
 require 'zlib'
 require 'stringio'
 
@@ -25,7 +24,7 @@ module Deluge
 
       DEFAULT_CALL_TIMEOUT = 5.0 # seconds
 
-      DEFAULT_PORT = 58846
+      DEFAULT_PORT = 58_846
 
       RPC_RESPONSE = 1
       RPC_ERROR = 2
@@ -58,25 +57,25 @@ module Deluge
         @running.make_true
 
         @main_thread = Thread.current
-        @thread = Thread.new(&self.method(:read_loop))
+        @thread = Thread.new(&method(:read_loop))
 
         # register present events
-        recover_events! if @events.size > 0
+        recover_events! if @events.size.positive?
 
         true
       end
 
       def authenticate(login, password)
-        self.call(DAEMON_LOGIN, [login, password, {'client_version' => Deluge::Rpc::VERSION.to_s}])
+        call(DAEMON_LOGIN, [login, password, { 'client_version' => Deluge::Rpc::VERSION.to_s }])
       end
 
       def method_list
-        self.call(DAEMON_METHOD_LIST)
+        call(DAEMON_METHOD_LIST)
       end
 
-      def register_event(event_name, force = false, &block)
-        unless @events[event_name] # Register event only ONCE!
-          self.call(DAEMON_REGISTER_EVENT, [event_name]) if @connection # Let events be initialized lazily
+      def register_event(event_name, _force = false, &block) # rubocop:disable Style/OptionalBooleanParameter
+        if @connection && !@events[event_name] # Register event only ONCE!
+          call(DAEMON_REGISTER_EVENT, [event_name]) # Let events be initialized lazily
         end
 
         @events[event_name] ||= []
@@ -90,7 +89,7 @@ module Deluge
       end
 
       def call(method, *args)
-        raise "Not connected!" unless @connection
+        raise 'Not connected!' unless @connection
 
         kwargs = {}
         if args.size == 1 && args[0].last.is_a?(Hash)
@@ -110,7 +109,8 @@ module Deluge
         result = future.value!(@call_timeout)
 
         if result.nil? && future.pending?
-          raise InvokeTimeoutError.new("Failed to retrieve response for '#{method}' in #{@call_timeout} seconds. Probably method not exists.")
+          raise InvokeTimeoutError,
+                "Failed to retrieve response for '#{method}' in #{@call_timeout} seconds. Probably method not exists."
         end
 
         result
@@ -119,12 +119,12 @@ module Deluge
       private
 
       def read_loop
-        while(@running.true?)
+        while @running.true?
           io_poll = IO.select([@connection], nil, [@connection], 0.1)
 
           next unless io_poll
 
-          read_sockets, _, error_sockets = io_poll
+          read_sockets, = io_poll
 
           if @connection.eof?
             # TODO: implement auto-recovery
@@ -139,10 +139,10 @@ module Deluge
             end
           end
         end
-      rescue => e
+      rescue StandardError => e
         @main_thread.raise(e)
       ensure
-        @connection.close if @connection
+        @connection&.close
         @connection = nil
         @messages.clear
       end
@@ -175,27 +175,27 @@ module Deluge
 
       def write_packet(packet)
         raw = Zlib::Deflate.deflate Rencoder.dump(packet)
-        raw = [PROTOCOL_VERSION, raw.bytesize].pack("CN") + raw
+        raw = [PROTOCOL_VERSION, raw.bytesize].pack('CN') + raw
 
         @write_mutex.synchronize do
-          if IO.select([], [@connection], nil, nil)
-            @connection.write(raw)
-          end
+          @connection.write(raw) if IO.select([], [@connection], nil, nil)
         end
       end
 
       def read_packets(socket)
-        raw = ""
+        raw = ''
 
         # Read message header
         protocol_version, buffer_size = socket.readpartial(5).unpack('CN')
 
-        raise('Received response with unknown protocol_version=' + protocol_version) if protocol_version != PROTOCOL_VERSION
+        if protocol_version != PROTOCOL_VERSION
+          raise("Received response with unknown protocol_version=#{protocol_version}")
+        end
 
         # a big response requires some extra reads because deluged may be
         # slow to generate and send all the data through the socket
         raw += socket.readpartial(buffer_size - raw.bytesize) while raw.bytesize < buffer_size
-        
+
         raw = Zlib::Inflate.inflate(raw)
 
         parse_packets(raw)
@@ -207,7 +207,7 @@ module Deluge
 
         present_events.each do |event, handlers|
           handlers.each do |handler|
-            self.register_event(event, &handler)
+            register_event(event, &handler)
           end
         end
       end
@@ -232,9 +232,7 @@ module Deluge
 
         packets = []
 
-        until(io.eof?)
-          packets << Rencoder.load(io)
-        end
+        packets << Rencoder.load(io) until io.eof?
 
         packets
       end

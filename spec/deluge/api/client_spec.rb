@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Deluge::Rpc::Client do
-
   let(:connection) do
     double('RpcConnection').tap do |connection|
       allow(connection).to receive(:start)

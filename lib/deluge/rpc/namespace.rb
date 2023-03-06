@@ -1,10 +1,13 @@
+# frozen_string_literal: true
+
 module Deluge
   module Rpc
     class Namespace
       attr_reader :name, :connection, :namespaces, :api_methods
 
       def initialize(name, connection)
-        @name, @connection = name, connection
+        @name = name
+        @connection = connection
         @namespaces = {}
         @api_methods = []
       end
@@ -14,7 +17,7 @@ module Deluge
 
         return namespaces[namespace] if namespaces.include?(namespace)
 
-        ns = Namespace.new("#{self.name}.#{namespace}", connection)
+        ns = Namespace.new("#{name}.#{namespace}", connection)
 
         namespaces[namespace] = ns
 

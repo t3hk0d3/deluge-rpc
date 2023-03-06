@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Deluge
   module Rpc
     require_relative 'rpc/version'

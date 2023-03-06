@@ -1,7 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Deluge::Rpc::Namespace do
-
   let(:connection) do
     double('RpcConnection').tap do |connection|
       allow(connection).to receive(:call)
@@ -55,5 +56,4 @@ describe Deluge::Rpc::Namespace do
       expect(connection).to have_received(:call).with('root.test', 'hello', 'world')
     end
   end
-
 end
